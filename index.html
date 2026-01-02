@@ -39,7 +39,6 @@ button, select, input {
 }
 </style>
 </head>
-
 <body>
 
 <h1>Procvičování navijských slovíček</h1>
@@ -115,7 +114,7 @@ let repeatMode = false;
 
 /* === FUNKCE === */
 function normalize(t){
-    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 }
 
 function shuffle(a){
@@ -138,14 +137,22 @@ function startQuiz(custom){
 
 function nextWord(){
     clearInterval(timer);
-    if(!words.length || lives<=0){
-        endQuiz();
-        return;
+
+    if(words.length===0){
+        if(repeatMode && mistakes.length>0){
+            words = shuffle([...mistakes]);
+            mistakes = [];
+        } else {
+            endQuiz();
+            return;
+        }
     }
+
     currentWord = words.shift();
     document.getElementById("word-container").textContent = currentWord.cz;
     document.getElementById("answer").value = "";
     document.getElementById("answer").dataset.correct = currentWord.es;
+
     if(document.getElementById("mode").value==="test") startTimer();
     updateUI();
 }
@@ -173,7 +180,7 @@ function checkAnswer(){
         correct++;
         if(repeatMode) mistakes = mistakes.filter(w=>w!==currentWord);
         setTimeout(nextWord,700);
-    }else{
+    } else {
         wrongAnswer("Špatně!");
     }
 }
@@ -219,5 +226,7 @@ if(localStorage.theme==="dark") document.body.classList.add("dark");
 
 startQuiz();
 </script>
+
 </body>
 </html>
+
