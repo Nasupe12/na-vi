@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procvičování navijštiny</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #word-container { font-size: 24px; margin: 20px; }
+        #result { font-size: 20px; margin: 10px; }
+        .correct { color: green; }
+        .incorrect { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Procvičování navijských slovíček</h1>
+    <div id="word-container"></div>
+    <input type="text" id="answer" placeholder="Zadej český překlad">
+    <button onclick="checkAnswer()">Odeslat</button>
+    <div id="result"></div>
+    <div id="score"></div>
+    <button onclick="restart()" style="display: none;">Opakovat</button>
+
+    <script>
+        const words = [
+            { cz: "Kaltxì", es: "Ahoj" },
+            { cz: "Irayo", es: "Děkuji" },
+            { cz: "Rutxe", es: "Prosím" },
+            { cz: "Oel ngati kameie", es: "Vidím tě" },
+            { cz: "Kìyevame", es: "Nashledanou" },
+            { cz: "Ngaru lu fpom srak", es: "Máš se dobře?" },
+            { cz: "oe", es: "já" },
+            { cz: "nga", es: "ty" },
+            { cz: "po", es: "on/ona" },
+            { cz: "tsaw", es: "to" },
+            { cz: "oeng", es: "my dva" },
+            { cz: "menga", es: "vy dva" },
+            { cz: "mefo", es: "oni dva" },
+            { cz: "pxoeng", es: "my tři" },
+            { cz: "pxenga", es: "vy tři" },
+            { cz: "awnga", es: "my všichni" },
+            { cz: "aynga", es: "vy všichni" },
+            { cz: "ayfo", es: "oni" },
+            { cz: "Tute", es: "Osoba" },
+            { cz: "Nantang", es: "Zmije" },
+            { cz: "Ikran", es: "Ikran" },
+            { cz: "Utral", es: "Strom" },
+            { cz: "Na’rìng", es: "Les" },
+            { cz: "Kelku", es: "Domov" },
+            { cz: "Layon", es: "Černá" },
+            { cz: "Ean", es: "Modrá / Zelená" },
+            { cz: "Tun", es: "Červená" },
+            { cz: "Rim", es: "Žlutá" },
+            { cz: "Teyr", es: "Bílá" },
+            { cz: "Lu", es: "Být" },
+            { cz: "Taron", es: "Lovit" },
+            { cz: "Sì", es: "A" },
+            { cz: "Srak", es: "Otazník" }
+        ];
+        
+        let shuffledWords, currentIndex = 0, correctAnswers = 0;
+        
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+        
+        function startQuiz() {
+            shuffledWords = shuffle([...words]);
+            currentIndex = 0;
+            correctAnswers = 0;
+            document.querySelector("button[onclick='restart()']").style.display = "none";
+            document.getElementById("score").innerHTML = "";
+            nextWord();
+        }
+        
+        function nextWord() {
+            if (shuffledWords.length > 0) {
+                let wordPair = shuffledWords.pop();
+                document.getElementById("word-container").textContent = wordPair.cz;
+                document.getElementById("answer").value = "";
+                document.getElementById("answer").setAttribute("data-correct", wordPair.es);
+                document.getElementById("result").textContent = "";
+            } else {
+                document.getElementById("word-container").textContent = "Hotovo!";
+                document.getElementById("score").innerHTML = `Úspěšnost: ${correctAnswers} / ${words.length}`;
+                document.querySelector("button[onclick='restart()']").style.display = "block";
+            }
+        }
+        
+        function checkAnswer() {
+            let userAnswer = document.getElementById("answer").value.trim();
+            let correctAnswer = document.getElementById("answer").getAttribute("data-correct");
+            let resultElement = document.getElementById("result");
+            
+            if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
+                resultElement.textContent = "Správně!";
+                resultElement.className = "correct";
+                correctAnswers++;
+            } else {
+                resultElement.textContent = `Špatně! Správná odpověď: ${correctAnswer}`;
+                resultElement.className = "incorrect";
+            }
+            
+            setTimeout(nextWord, 1500);
+        }
+        
+        function restart() {
+            startQuiz();
+        }
+        
+        startQuiz();
+    </script>
+</body>
+</html>
