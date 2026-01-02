@@ -72,7 +72,7 @@ const allWords = [
 { na: "Rutxe", cz: "Prosím" },
 { na: "Oel ngati kameie", cz: "Vidím tě" },
 { na: "Kìyevame", cz: "Nashledanou" },
-{ na: "Ngaru lu fpom srak", cz: "Máš se dobře?" },
+{ na: "Ngaru lu fpom srak", cz: "Máš se dobře" },
 { na: "oe", cz: "já" },
 { na: "nga", cz: "ty" },
 { na: "po", cz: "on/ona" },
@@ -92,7 +92,7 @@ const allWords = [
 { na: "Na’rìng", cz: "Les" },
 { na: "Kelku", cz: "Domov" },
 { na: "Layon", cz: "Černá" },
-{ na: "Ean", cz: "Modrá / Zelená" },
+{ na: "Ean", cz: "Modrozelená" },
 { na: "Tun", cz: "Červená" },
 { na: "Rim", cz: "Žlutá" },
 { na: "Teyr", cz: "Bílá" },
@@ -108,9 +108,10 @@ let mistakes = [];
 let correct = 0;
 let lives = 3;
 let timer = null;
-let timeLeft = 3;
+let timeLeft = 5;
 let currentWord;
 let repeatMode = false;
+let totalWords = 0;
 
 /* === FUNKCE === */
 function normalize(t){
@@ -127,21 +128,25 @@ function startQuiz(custom){
     mistakes = [];
     correct = 0;
     lives = 3;
+    totalWords = words.length;
     clearInterval(timer);
+
     document.getElementById("score").innerHTML = "";
     document.getElementById("result").textContent = "";
     document.getElementById("restartBtn").style.display = "none";
     document.getElementById("mistakeBtn").style.display = "none";
+
     nextWord();
 }
 
 function nextWord(){
     clearInterval(timer);
+    document.getElementById("result").textContent = "";
 
-    // Pokud nejsou slova, ukončí kvíz
     if(words.length === 0){
         if(repeatMode && mistakes.length > 0){
             words = shuffle([...mistakes]);
+            totalWords = words.length;
             mistakes = [];
         } else {
             endQuiz();
@@ -154,12 +159,18 @@ function nextWord(){
     document.getElementById("answer").value = "";
     document.getElementById("answer").dataset.correct = currentWord.cz;
 
-    if(document.getElementById("mode").value === "test") startTimer();
+    // Časovač pouze v testovacím režimu
+    if(document.getElementById("mode").value === "test"){
+        startTimer();
+    } else {
+        document.getElementById("timer").textContent = "";
+    }
+
     updateUI();
 }
 
 function startTimer(){
-    timeLeft = 3;
+    timeLeft = 5;
     document.getElementById("timer").textContent = `⏱️ ${timeLeft}`;
     timer = setInterval(()=>{
         timeLeft--;
@@ -189,16 +200,25 @@ function checkAnswer(){
 function wrongAnswer(msg){
     document.getElementById("result").innerHTML = `${msg} Správně: <b>${currentWord.cz}</b>`;
     document.getElementById("result").className = "incorrect";
+
     if(!mistakes.includes(currentWord)) mistakes.push(currentWord);
+
+    if(document.getElementById("mode").value === "test"){
+        lives--;
+        if(lives <= 0){
+            endQuiz();
+            return;
+        }
+    }
+
     if(repeatMode) words.push(currentWord);
-    if(document.getElementById("mode").value === "test") lives--;
     setTimeout(nextWord, 1300);
 }
 
 function endQuiz(){
     document.getElementById("word-container").textContent = "Hotovo!";
-    const percent = Math.round((correct/allWords.length)*100);
-    document.getElementById("score").innerHTML = `Správně: ${correct} / ${allWords.length}<br>Úspěšnost: ${percent}%`;
+    const percent = totalWords > 0 ? Math.round((correct/totalWords)*100) : 100;
+    document.getElementById("score").innerHTML = `Správně: ${correct} / ${totalWords}<br>Úspěšnost: ${percent}%`;
 
     document.getElementById("restartBtn").style.display = "inline";
     if(mistakes.length) document.getElementById("mistakeBtn").style.display = "inline";
@@ -207,12 +227,14 @@ function endQuiz(){
 function repeatMistakes(){
     repeatMode = true;
     words = shuffle([...mistakes]);
+    totalWords = words.length;
     mistakes = [];
-
-    // Skrytí tlačítek při opakování
+    correct = 0;
+    lives = 3;
+    document.getElementById("score").innerHTML = "";
+    document.getElementById("result").textContent = "";
     document.getElementById("restartBtn").style.display = "none";
     document.getElementById("mistakeBtn").style.display = "none";
-
     nextWord();
 }
 
@@ -236,4 +258,3 @@ startQuiz();
 
 </body>
 </html>
-
