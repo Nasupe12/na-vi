@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Procvičování navijštiny</title>
-
 <style>
 :root {
     --bg: #ffffff;
@@ -21,6 +20,7 @@ body {
     color: var(--text);
     font-family: Arial, sans-serif;
     text-align: center;
+    transition: 0.3s;
 }
 #word-container {
     font-size: 26px;
@@ -29,12 +29,13 @@ body {
     padding: 15px;
     border-radius: 10px;
 }
-.correct { color: green; }
-.incorrect { color: red; }
+.correct { color: #2ecc71; }
+.incorrect { color: #e74c3c; }
 button, select, input {
     padding: 8px;
     margin: 5px;
     border-radius: 6px;
+    border: none;
 }
 </style>
 </head>
@@ -67,39 +68,39 @@ button, select, input {
 <script>
 /* === SLOVÍČKA === */
 const allWords = [
-    { cz: "Kaltxì", es: "Ahoj" },
-    { cz: "Irayo", es: "Děkuji" },
-    { cz: "Rutxe", es: "Prosím" },
-    { cz: "Oel ngati kameie", es: "Vidím tě" },
-    { cz: "Kìyevame", es: "Nashledanou" },
-    { cz: "Ngaru lu fpom srak", es: "Máš se dobře?" },
-    { cz: "oe", es: "já" },
-    { cz: "nga", es: "ty" },
-    { cz: "po", es: "on/ona" },
-    { cz: "tsaw", es: "to" },
-    { cz: "oeng", es: "my dva" },
-    { cz: "menga", es: "vy dva" },
-    { cz: "mefo", es: "oni dva" },
-    { cz: "pxoeng", es: "my tři" },
-    { cz: "pxenga", es: "vy tři" },
-    { cz: "awnga", es: "my všichni" },
-    { cz: "aynga", es: "vy všichni" },
-    { cz: "ayfo", es: "oni" },
-    { cz: "Tute", es: "Osoba" },
-    { cz: "Nantang", es: "Zmije" },
-    { cz: "Ikran", es: "Ikran" },
-    { cz: "Utral", es: "Strom" },
-    { cz: "Na’rìng", es: "Les" },
-    { cz: "Kelku", es: "Domov" },
-    { cz: "Layon", es: "Černá" },
-    { cz: "Ean", es: "Modrá / Zelená" },
-    { cz: "Tun", es: "Červená" },
-    { cz: "Rim", es: "Žlutá" },
-    { cz: "Teyr", es: "Bílá" },
-    { cz: "Lu", es: "Být" },
-    { cz: "Taron", es: "Lovit" },
-    { cz: "Sì", es: "A" },
-    { cz: "Srak", es: "Otazník" }
+{ cz: "Kaltxì", es: "Ahoj" },
+{ cz: "Irayo", es: "Děkuji" },
+{ cz: "Rutxe", es: "Prosím" },
+{ cz: "Oel ngati kameie", es: "Vidím tě" },
+{ cz: "Kìyevame", es: "Nashledanou" },
+{ cz: "Ngaru lu fpom srak", es: "Máš se dobře?" },
+{ cz: "oe", es: "já" },
+{ cz: "nga", es: "ty" },
+{ cz: "po", es: "on/ona" },
+{ cz: "tsaw", es: "to" },
+{ cz: "oeng", es: "my dva" },
+{ cz: "menga", es: "vy dva" },
+{ cz: "mefo", es: "oni dva" },
+{ cz: "pxoeng", es: "my tři" },
+{ cz: "pxenga", es: "vy tři" },
+{ cz: "awnga", es: "my všichni" },
+{ cz: "aynga", es: "vy všichni" },
+{ cz: "ayfo", es: "oni" },
+{ cz: "Tute", es: "Osoba" },
+{ cz: "Nantang", es: "Zmije" },
+{ cz: "Ikran", es: "Ikran" },
+{ cz: "Utral", es: "Strom" },
+{ cz: "Na’rìng", es: "Les" },
+{ cz: "Kelku", es: "Domov" },
+{ cz: "Layon", es: "Černá" },
+{ cz: "Ean", es: "Modrá / Zelená" },
+{ cz: "Tun", es: "Červená" },
+{ cz: "Rim", es: "Žlutá" },
+{ cz: "Teyr", es: "Bílá" },
+{ cz: "Lu", es: "Být" },
+{ cz: "Taron", es: "Lovit" },
+{ cz: "Sì", es: "A" },
+{ cz: "Srak", es: "Otazník" }
 ];
 
 /* === PROMĚNNÉ === */
@@ -110,120 +111,113 @@ let lives = 3;
 let timer = null;
 let timeLeft = 3;
 let currentWord;
+let repeatMode = false;
 
 /* === FUNKCE === */
-function normalize(text) {
-    return text.toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim();
+function normalize(t){
+    return t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-function shuffle(arr) {
-    return arr.sort(() => Math.random() - 0.5);
+function shuffle(a){
+    return a.sort(() => Math.random() - 0.5);
 }
 
-function startQuiz(custom) {
+function startQuiz(custom){
+    repeatMode = false;
     words = shuffle(custom ? [...custom] : [...allWords]);
     mistakes = [];
     correct = 0;
     lives = 3;
     clearInterval(timer);
-
     document.getElementById("score").innerHTML = "";
     document.getElementById("result").textContent = "";
     document.getElementById("restartBtn").style.display = "none";
     document.getElementById("mistakeBtn").style.display = "none";
-
     nextWord();
 }
 
-function nextWord() {
+function nextWord(){
     clearInterval(timer);
-
-    if (!words.length || lives <= 0) {
+    if(!words.length || lives<=0){
         endQuiz();
         return;
     }
-
-    currentWord = words.pop();
+    currentWord = words.shift();
     document.getElementById("word-container").textContent = currentWord.cz;
     document.getElementById("answer").value = "";
     document.getElementById("answer").dataset.correct = currentWord.es;
-
-    if (document.getElementById("mode").value === "test") {
-        startTimer();
-    }
+    if(document.getElementById("mode").value==="test") startTimer();
     updateUI();
 }
 
-function startTimer() {
+function startTimer(){
     timeLeft = 3;
     document.getElementById("timer").textContent = `⏱️ ${timeLeft}`;
-    timer = setInterval(() => {
+    timer = setInterval(()=>{
         timeLeft--;
         document.getElementById("timer").textContent = `⏱️ ${timeLeft}`;
-        if (timeLeft <= 0) {
+        if(timeLeft<=0){
             clearInterval(timer);
-            registerMistake("Vypršel čas!");
+            wrongAnswer("Vypršel čas!");
         }
-    }, 1000);
+    },1000);
 }
 
-function checkAnswer() {
+function checkAnswer(){
     clearInterval(timer);
     const user = normalize(document.getElementById("answer").value);
     const correctAns = normalize(document.getElementById("answer").dataset.correct);
-
-    if (user === correctAns) {
-        correct++;
+    if(user===correctAns){
         document.getElementById("result").textContent = "Správně!";
         document.getElementById("result").className = "correct";
-        setTimeout(nextWord, 700);
-    } else {
-        registerMistake("Špatně!");
+        correct++;
+        if(repeatMode) mistakes = mistakes.filter(w=>w!==currentWord);
+        setTimeout(nextWord,700);
+    }else{
+        wrongAnswer("Špatně!");
     }
 }
 
-function registerMistake(msg) {
-    mistakes.push(currentWord);
-    document.getElementById("result").textContent = msg;
+function wrongAnswer(msg){
+    document.getElementById("result").innerHTML = `${msg} Správně: <b>${currentWord.es}</b>`;
     document.getElementById("result").className = "incorrect";
-    if (document.getElementById("mode").value === "test") lives--;
-    setTimeout(nextWord, 1000);
+    if(!mistakes.includes(currentWord)) mistakes.push(currentWord);
+    if(repeatMode) words.push(currentWord);
+    if(document.getElementById("mode").value==="test") lives--;
+    setTimeout(nextWord,1300);
 }
 
-function endQuiz() {
+function endQuiz(){
     document.getElementById("word-container").textContent = "Hotovo!";
-    const percent = Math.round((correct / allWords.length) * 100);
-    document.getElementById("score").innerHTML =
-        `Správně: ${correct} / ${allWords.length}<br>Úspěšnost: ${percent}%`;
-    document.getElementById("restartBtn").style.display = "inline";
-    if (mistakes.length) document.getElementById("mistakeBtn").style.display = "inline";
+    const percent = Math.round((correct/allWords.length)*100);
+    document.getElementById("score").innerHTML=`Správně: ${correct} / ${allWords.length}<br>Úspěšnost: ${percent}%`;
+    document.getElementById("restartBtn").style.display="inline";
+    if(mistakes.length) document.getElementById("mistakeBtn").style.display="inline";
 }
 
-function repeatMistakes() {
-    startQuiz(mistakes);
+function repeatMistakes(){
+    repeatMode = true;
+    words = shuffle([...mistakes]);
+    mistakes = [];
+    nextWord();
 }
 
-function toggleTheme() {
+function toggleTheme(){
     document.body.classList.toggle("dark");
-    localStorage.theme = document.body.classList.contains("dark") ? "dark" : "light";
+    localStorage.theme=document.body.classList.contains("dark")?"dark":"light";
 }
 
-function updateUI() {
-    document.getElementById("lives").textContent =
-        document.getElementById("mode").value === "test" ? `❤️ ${lives}` : "";
+function updateUI(){
+    document.getElementById("lives").textContent = document.getElementById("mode").value==="test"?`❤️ ${lives}`:"";
 }
 
-document.getElementById("answer").addEventListener("keydown", e => {
-    if (e.key === "Enter") checkAnswer();
+document.getElementById("answer").addEventListener("keydown",e=>{
+    if(e.key==="Enter") checkAnswer();
 });
 
-if (localStorage.theme === "dark") document.body.classList.add("dark");
+if(localStorage.theme==="dark") document.body.classList.add("dark");
 
 startQuiz();
 </script>
-
 </body>
 </html>
